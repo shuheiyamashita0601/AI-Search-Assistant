@@ -1,4 +1,6 @@
 ## ディレクトリ構成
+
+```text
 test-ai-search-assistant/
 ├── 🖥️ frontend/                  # Next.js フロントエンド
 │   ├── Dockerfile
@@ -120,6 +122,7 @@ test-ai-search-assistant/
     ├── launch.json
     └── tasks.json
 
+```
 
 
 ## 技術スタック
