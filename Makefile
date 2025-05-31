@@ -3,36 +3,6 @@
 
 .PHONY: help build up down restart logs clean
 
-# デフォルトターゲット：ヘルプを表示
-help:
-	@echo "🐳 シンプルDocker環境管理コマンド"
-	@echo ""
-	@echo "📦 ビルド関連:"
-	@echo "  make build        - すべてのイメージをビルド"
-	@echo "  make build-force  - キャッシュを無視してビルド"
-	@echo ""
-	@echo "🚀 環境管理:"
-	@echo "  make up           - 開発環境を起動"
-	@echo "  make down         - 開発環境を停止"
-	@echo "  make restart      - 開発環境を再起動"
-	@echo ""
-	@echo "📊 監視・ログ:"
-	@echo "  make logs         - 全サービスのログを表示"
-	@echo "  make logs-follow  - ログをリアルタイム監視"
-	@echo "  make status       - サービス状態を確認"
-	@echo ""
-	@echo "🔧 開発用ツール:"
-	@echo "  make shell-backend   - バックエンドコンテナにシェル接続"
-	@echo "  make shell-frontend  - フロントエンドコンテナにシェル接続"
-	@echo "  make db-migrate      - データベースマイグレーション"
-	@echo "  make db-seed         - シードデータ投入"
-	@echo "  make db-studio       - Prisma Studioを起動"
-	@echo ""
-	@echo "🧹 メンテナンス:"
-	@echo "  make clean        - コンテナとボリュームを削除"
-	@echo "  make clean-images - 未使用イメージを削除"
-	@echo "  make clean-all    - 完全クリーンアップ"
-
 # すべてのイメージをビルド
 build:
 	@echo "🏗️  すべてのイメージをビルド中..."
@@ -45,6 +15,17 @@ build-force:
 	@echo "🏗️  キャッシュを無視してすべてのイメージをビルド中..."
 	docker-compose build --no-cache
 	@echo "✅ 強制ビルドが完了しました"
+
+# package-lock.json生成（初回セットアップ用）
+init-lock-files:
+	@echo "📦 すべてのパッケージでpackage-lock.jsonを生成中..."
+	@echo "1. バックエンド..."
+	cd backend && npm install
+	@echo "2. フロントエンド..."
+	cd frontend && npm install
+	@echo "3. 型定義パッケージ..."
+	cd packages/types && npm install
+	@echo "✅ すべてのpackage-lock.jsonが生成されました"
 
 # 開発環境を起動（シンプル版）
 up:
@@ -150,16 +131,6 @@ db-reset:
 	@echo "⚠️  データベースをリセット中..."
 	docker-compose exec backend npm run db:reset
 
-# テスト実行
-test:
-	@echo "🧪 テストを実行中..."
-	docker-compose exec backend npm run test
-	docker-compose exec frontend npm run test
-
-test-coverage:
-	@echo "📊 カバレッジ付きテストを実行中..."
-	docker-compose exec backend npm run test:coverage
-
 # メンテナンス
 clean:
 	@echo "🧹 コンテナとボリュームを削除中..."
@@ -190,22 +161,6 @@ quick-start: up db-migrate db-seed
 backup-db:
 	@echo "💾 データベースバックアップ中..."
 	docker-compose exec postgres pg_dump -U postgres test_ai_search_assistant > backup_$(shell date +%Y%m%d_%H%M%S).sql
-
-# トラブルシューティング
-debug:
-	@echo "🔍 システム診断中..."
-	@echo ""
-	@echo "📋 利用可能なサービス一覧:"
-	docker-compose config --services
-	@echo ""
-	@echo "📊 現在のサービス状態:"
-	docker-compose ps
-	@echo ""
-	@echo "🌐 ネットワーク状態:"
-	docker network ls | grep test-ai-search || echo "カスタムネットワークが見つかりません"
-	@echo ""
-	@echo "💾 ボリューム状態:"
-	docker volume ls | grep test-ai-search || echo "カスタムボリュームが見つかりません"
 
 # 設定の検証
 validate:

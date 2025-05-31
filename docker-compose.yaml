@@ -4,10 +4,7 @@
 services:
   # PostgreSQL データベースサーバー
   postgres:
-    build:
-      context: .docker/postgres
-      dockerfile: Dockerfile
-    image: test-ai-search-assistant-postgres:latest
+    image: postgres:17.5-alpine
     container_name: test-ai-search-postgres
     restart: unless-stopped
     environment:
@@ -59,8 +56,8 @@ services:
   # 共有型パッケージビルダー
   types:
     build:
-      context: ./packages/types
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: ./packages/types/Dockerfile.dev
     container_name: test-ai-search-types
     restart: unless-stopped
     volumes:
@@ -76,8 +73,8 @@ services:
   # バックエンドAPIサーバー
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: ./backend/Dockerfile.dev
     container_name: test-ai-search-backend
     restart: unless-stopped
     environment:
@@ -140,8 +137,8 @@ services:
   # フロントエンドWebアプリケーション
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: ./frontend/Dockerfile.dev
     container_name: test-ai-search-frontend
     restart: unless-stopped
     environment:
@@ -161,21 +158,11 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # ソースコードのホットリロード
-      - ./frontend/src:/app/src:ro
-      - ./frontend/public:/app/public:ro
-      
-      # 設定ファイル
-      - ./frontend/next.config.*:/app/:ro
-      - ./frontend/tailwind.config.*:/app/:ro
-      - ./frontend/postcss.config.*:/app/:ro
-      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+      # ソースコードのホットリロード（frontendディレクトリをワーキングディレクトリに）
+      - ./frontend/src:/app/frontend/src:ro
       
       # 共有型定義の参照
       - types_dist:/app/node_modules/@test-ai-search-assistant/types/dist:ro
-      
-      # Next.jsビルドキャッシュ
-      - frontend_next:/app/.next
     depends_on:
       backend:
         condition: service_healthy

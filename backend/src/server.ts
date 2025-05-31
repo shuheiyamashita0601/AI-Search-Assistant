@@ -57,7 +57,7 @@ app.get('/api/v1', (req, res) => {
 });
 
 // 404ハンドラー
-app.use('*', (req, res) => {
+app.use((req, res, next) => {
   res.status(404).json({
     success: false,
     error: {

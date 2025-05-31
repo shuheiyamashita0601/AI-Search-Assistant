@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // クライアントコードの出力場所を指定
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーモデル：アプリケーションの基本的なユーザー情報を管理
+model User {
+  // 主キー：自動増分のID
+  id        Int      @id @default(autoincrement())
+  
+  // 基本情報
+  email     String   @unique @db.VarChar(255)  // メールアドレス（一意制約）
+  name      String?  @db.VarChar(100)          // 名前（任意）
+  
+  // タイムスタンプ
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // 検索履歴との関連
+  searches  Search[] @relation("UserSearches")
+  
+  // テーブル名のマッピング
+  @@map("users")
+}
+
+// 検索履歴モデル：ユーザーの検索活動を記録
+model Search {
+  // 主キー
+  id        Int      @id @default(autoincrement())
+  
+  // 検索内容
+  query     String   @db.VarChar(500)          // 検索クエリ
+  results   Json?                              // 検索結果（JSON形式）
+  
+  // ユーザーとの関連
+  userId    Int      @map("user_id")
+  user      User     @relation("UserSearches", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // タイムスタンプ
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // インデックス
+  @@index([userId])
+  @@index([createdAt])
+  
+  // テーブル名のマッピング
+  @@map("searches")
+}
+
+// APIキーモデル：外部サービス（OpenAI等）のAPIキーを管理
+model ApiKey {
+  // 主キー
+  id          Int      @id @default(autoincrement())
+  
+  // キー情報
+  name        String   @db.VarChar(100)         // キーの名前・説明
+  keyValue    String   @map("key_value") @db.VarChar(500) // 暗号化されたキー値
+  provider    String   @db.VarChar(50)          // プロバイダー（openai, azure等）
+  isActive    Boolean  @default(true) @map("is_active")   // アクティブ状態
+  
+  // タイムスタンプ
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // インデックス
+  @@index([provider])
+  @@index([isActive])
+  
+  // テーブル名のマッピング
+  @@map("api_keys")
+}
