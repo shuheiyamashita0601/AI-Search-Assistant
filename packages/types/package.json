@@ -1,0 +1,51 @@
+{
+  "name": "@test-ai-search-assistant/types",
+  "version": "1.0.0",
+  "description": "フロントエンドとバックエンドで共有するTypeScript型定義",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "@types/node": "^22.10.1"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "engines": {
+    "node": ">=22.16.0",
+    "npm": ">=10.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/test-ai-search-assistant.git",
+    "directory": "packages/types"
+  },
+  "keywords": [
+    "typescript",
+    "types",
+    "shared",
+    "ai-search"
+  ],
+  "author": "test-ai-search-assistant-team",
+  "license": "MIT"
+}

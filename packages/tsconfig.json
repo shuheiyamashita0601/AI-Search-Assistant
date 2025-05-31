@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // 基本設定
+    "target": "ES2022",                    // モダンなJavaScriptターゲット
+    "module": "ESNext",                    // ESモジュール形式で出力
+    "moduleResolution": "bundler",         // バンドラー用のモジュール解決
+    "lib": ["ES2022"],                     // 使用するライブラリ
+    
+    // 出力設定
+    "outDir": "./dist",                    // コンパイル結果の出力先
+    "rootDir": "./src",                    // ソースコードのルートディレクトリ
+    "declaration": true,                   // .d.tsファイルを生成
+    "declarationMap": true,                // 型定義ファイルのソースマップを生成
+    "sourceMap": true,                     // デバッグ用のソースマップを生成
+    "removeComments": false,               // コメントを保持（型定義では重要）
+    
+    // 型チェック設定（厳格）
+    "strict": true,                        // 厳格な型チェックを有効化
+    "noImplicitAny": true,                 // 暗黙的なany型を禁止
+    "noImplicitReturns": true,             // 戻り値のない関数を検出
+    "noImplicitOverride": true,            // オーバーライドの明示を要求
+    "noPropertyAccessFromIndexSignature": true, // インデックスシグネチャからのプロパティアクセスを制限
+    "noUncheckedIndexedAccess": true,      // インデックスアクセス時のundefinedチェックを強制
+    "exactOptionalPropertyTypes": true,    // オプショナルプロパティの厳密な型チェック
+    
+    // 高度な型チェック
+    "noUnusedLocals": true,                // 未使用のローカル変数を検出
+    "noUnusedParameters": true,            // 未使用のパラメータを検出
+    "noFallthroughCasesInSwitch": true,    // switch文のfallthrough検出
+    "noImplicitThis": true,                // 暗黙的なthisの使用を禁止
+    
+    // ES機能サポート
+    "allowSyntheticDefaultImports": true,  // デフォルトエクスポートのない場合の合成インポートを許可
+    "esModuleInterop": true,               // CommonJSとESモジュールの相互運用性
+    "forceConsistentCasingInFileNames": true, // ファイル名の大文字小文字の一貫性を強制
+    "isolatedModules": true,               // 各ファイルを独立したモジュールとして扱う
+    "verbatimModuleSyntax": true,          // モジュール構文をそのまま保持
+    
+    // 解決設定
+    "resolveJsonModule": true,             // JSONファイルのインポートを許可
+    "allowImportingTsExtensions": false,   // .ts拡張子のインポートを禁止（バンドラー用）
+    "noEmit": false,                       // 実際にファイルを出力（型定義のため）
+    
+    // パス設定
+    "baseUrl": ".",                        // 相対パスの基準ディレクトリ
+    "paths": {
+      "@/*": ["./src/*"]                   // エイリアスパスの設定
+    },
+    
+    // 実験的機能
+    "experimentalDecorators": false,       // デコレータは使用しない（型定義では不要）
+    "emitDecoratorMetadata": false         // デコレータメタデータは生成しない
+  },
+  
+  // コンパイル対象とする要素
+  "include": [
+    "src/**/*"                             // srcディレクトリ以下のすべてのTypeScriptファイル
+  ],
+  
+  // コンパイル対象から除外する要素
+  "exclude": [
+    "node_modules",                        // 依存関係パッケージ
+    "dist",                                // コンパイル済みファイル
+    "**/*.test.ts",                        // テストファイル
+    "**/*.spec.ts",                        // 仕様テストファイル
+    "**/__tests__/**/*",                   // テストディレクトリ
+    "coverage"                             // カバレッジレポート
+  ],
+  
+  // TypeScript 5.8.3の最新機能を活用
+  "ts-node": {
+    "esm": true,                           // ES Modulesサポート
+    "experimentalSpecifierResolution": "node"
+  }
+}
