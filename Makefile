@@ -37,7 +37,7 @@ up:
 	@echo "  メインアプリ: http://localhost"
 	@echo "  フロントエンド直接: http://localhost:3000"
 	@echo "  バックエンドAPI直接: http://localhost:3001"
-	@echo "  Prisma Studio: make db-studio"
+	@echo "  Prisma Studio: http://localhost:5556 (または make db-studio)"
 
 # 開発環境を停止
 down:
@@ -98,8 +98,8 @@ db-seed:
 
 db-studio:
 	@echo "🎨 Prisma Studioを起動中..."
-	docker-compose exec -d backend npm run db:studio
-	@echo "✅ Prisma Studio: http://localhost:5555"
+	docker-compose exec -d backend npx prisma studio --hostname 0.0.0.0 --port 5556 --browser none
+	@echo "✅ Prisma Studio: http://localhost:5556"
 
 db-reset:
 	@echo "⚠️  データベースをリセット中..."
