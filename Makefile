@@ -39,32 +39,6 @@ up:
 	@echo "  バックエンドAPI直接: http://localhost:3001"
 	@echo "  Prisma Studio: make db-studio"
 
-# 段階的起動（トラブルシューティング用）
-up-staged:
-	@echo "🚀 段階的に開発環境を起動中..."
-	@echo "📊 データベースサービスを起動中..."
-	docker-compose up -d postgres redis
-	@echo "⏳ データベース起動待ち（30秒）..."
-	sleep 30
-	@echo "🏗️  型定義サービスを起動中..."
-	docker-compose up -d types
-	@echo "⏳ 型定義コンパイル待ち（10秒）..."
-	sleep 10
-	@echo "🚀 アプリケーションサービスを起動中..."
-	docker-compose up -d backend frontend
-	@echo "⏳ アプリケーション起動待ち（20秒）..."
-	sleep 20
-
-	@echo "🌐 Nginxリバースプロキシを起動中..."
-	docker-compose up -d nginx
-
-	@echo "✅ 段階的起動が完了しました"
-	@echo ""
-	@echo "🌐 アクセス情報:"
-	@echo "  メインアプリ: http://localhost"
-	@echo "  フロントエンド直接: http://localhost:3000"
-	@echo "  バックエンドAPI直接: http://localhost:3001"
-
 # 開発環境を停止
 down:
 	@echo "🛑 開発環境を停止中..."
