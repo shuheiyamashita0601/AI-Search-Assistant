@@ -83,6 +83,10 @@ services:
       PORT: 3001
       SERVICE_NAME: backend
       
+      # ホットリロード設定
+      CHOKIDAR_USEPOLLING: true
+      WATCHPACK_POLLING: true
+      
       # データベース接続
       DATABASE_URL: postgresql://postgres:password@postgres:5432/test_ai_search_assistant
       
@@ -105,10 +109,11 @@ services:
       LOG_FILE_PATH: /app/logs/app.log
     ports:
       - "3001:3001"
+      - "5556:5556"  # Prisma Studio用ポート
     volumes:
-      # ソースコードのホットリロード
-      - ./backend/src:/app/src:ro
-      - ./backend/prisma:/app/prisma:ro
+      # ソースコードのホットリロード（読み書き可能に変更）
+      - ./backend/src:/app/backend/src
+      - ./backend/prisma:/app/backend/prisma
       
       # 共有型定義の参照
       - types_dist:/app/node_modules/@test-ai-search-assistant/types/dist:ro
@@ -116,8 +121,12 @@ services:
       # ログファイルの永続化
       - backend_logs:/app/logs
       
-      # 設定ファイル
-      - ./backend/tsconfig.json:/app/tsconfig.json:ro
+      # 設定ファイル（読み書き可能に変更）
+      - ./backend/tsconfig.json:/app/backend/tsconfig.json
+      - ./backend/package.json:/app/backend/package.json
+      
+      # node_modulesキャッシュ（パフォーマンス向上）
+      - /app/backend/node_modules
     depends_on:
       postgres:
         condition: service_healthy

@@ -6,6 +6,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import apiV1Router from './api/v1/index.js';
 
 // 環境変数の設定
 const PORT = process.env.PORT || 3001;
@@ -41,6 +42,8 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
+app.use('/api/v1', apiV1Router);
+
 // ルートエンドポイント
 app.get('/api/v1', (req, res) => {
   res.status(200).json({
@@ -50,6 +53,10 @@ app.get('/api/v1', (req, res) => {
       version: '1.0.0',
       endpoints: [
         'GET /api/v1/health - ヘルスチェック',
+        'POST /api/v1/auth/register - ユーザー登録',
+        'POST /api/v1/auth/login - ログイン',
+        'GET /api/v1/auth/profile - ユーザープロフィール取得',
+        'POST /api/v1/auth/logout - ログアウト',
         'POST /api/v1/search - AI検索（今後実装予定）'
       ]
     }
