@@ -3,7 +3,7 @@
  * Zodライブラリを使用して入力データの検証を行います
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import type { ValidationErrorResponse } from '@test-ai-search-assistant/types';
 

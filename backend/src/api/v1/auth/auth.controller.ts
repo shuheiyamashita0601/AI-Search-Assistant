@@ -3,7 +3,7 @@
  * 認証関連のHTTPリクエストを処理する関数群
  */
 
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { registerUser, loginUser } from '../../../services/authService.js';
 import type { LoginCredentials, RegisterRequest } from '@test-ai-search-assistant/types';
 
@@ -15,23 +15,19 @@ import type { LoginCredentials, RegisterRequest } from '@test-ai-search-assistan
  */
 export async function registerController(req: Request, res: Response): Promise<void> {
   try {
-    // バリデーション済みのリクエストデータを構築
-    const registerData: RegisterRequest = {
-      email: req.body.email,
-      password: req.body.password,
-      name: req.body.name,
-    };
+    // バリデーション済みのリクエストデータを取得
+    const { email, password, name } = req.body;
 
-    console.log(`新規ユーザー登録試行: ${registerData.email}`);
+    console.log(`新規ユーザー登録試行: ${email}`);
 
-    // 認証サービスでユーザー登録を実行
-    const result = await registerUser(registerData);
+    // 認証サービスでユーザー登録を実行（個別引数で渡す）
+    const result = await registerUser(email, password, name);
 
     if (result.success) {
-      console.log(`ユーザー登録成功: ${registerData.email}`);
+      console.log(`ユーザー登録成功: ${email}`);
       res.status(201).json(result);
     } else {
-      console.warn(`ユーザー登録失敗: ${registerData.email} - ${result.error}`);
+      console.warn(`ユーザー登録失敗: ${email} - ${result.error}`);
       res.status(400).json(result);
     }
 
@@ -54,23 +50,19 @@ export async function registerController(req: Request, res: Response): Promise<v
  */
 export async function loginController(req: Request, res: Response): Promise<void> {
   try {
-    // バリデーション済みのリクエストデータを構築
-    const credentials: LoginCredentials = {
-      username: req.body.email, // emailをusernameとして使用
-      password: req.body.password,
-      rememberMe: req.body.rememberMe || false,
-    };
+    // バリデーション済みのリクエストデータを取得
+    const { email, password } = req.body;
 
-    console.log(`ログイン試行: ${credentials.username}`);
+    console.log(`ログイン試行: ${email}`);
 
-    // 認証サービスでログイン処理を実行
-    const result = await loginUser(credentials);
+    // 認証サービスでログイン処理を実行（個別引数で渡す）
+    const result = await loginUser(email, password);
 
     if (result.success) {
-      console.log(`ログイン成功: ${credentials.username}`);
+      console.log(`ログイン成功: ${email}`);
       res.status(200).json(result);
     } else {
-      console.warn(`ログイン失敗: ${credentials.username} - ${result.error}`);
+      console.warn(`ログイン失敗: ${email} - ${result.error}`);
       res.status(401).json(result);
     }
 

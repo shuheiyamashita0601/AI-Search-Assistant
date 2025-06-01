@@ -88,7 +88,7 @@ app.use('/api/v1/auth', authRoutes);
 // app.use('/api/v1/search', searchRoutes);
 // app.use('/api/v1/chat', chatRoutes);
 
-// ヘルスチェックエンドポイント
+// ヘルスチェックエンドポイント（ホットリロードテスト用メッセージ追加）
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -98,6 +98,7 @@ app.get('/api/v1/health', (req, res) => {
       environment: NODE_ENV,
       version: '1.0.0',
       uptime: process.uptime(),
+      message: '🔥 ホットリロード機能が正常に動作しています！',
     }
   });
 });

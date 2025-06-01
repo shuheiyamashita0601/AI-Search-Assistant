@@ -23,9 +23,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-development-on
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '86400'; // 24時間（秒）
 
 // セキュリティ設定の定数
-const MAX_LOGIN_ATTEMPTS = 5;        // 最大ログイン試行回数
-const LOCK_TIME = 2 * 60 * 60 * 1000; // アカウントロック時間（2時間、ミリ秒）
-const SALT_ROUNDS = 12;              // bcryptのソルトラウンド数（セキュリティレベル）
+const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
+const LOCK_TIME = parseInt(process.env.ACCOUNT_LOCK_TIME || '7200000'); // 2時間
+const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
 
 /**
  * パスワードをハッシュ化する関数
@@ -104,17 +104,18 @@ export function verifyToken(token: string): any {
 }
 
 /**
- * ユーザー登録処理
- * 新規ユーザーをデータベースに登録し、認証トークンを発行
- * @param registerData - 登録データ（メール、パスワード、名前）
- * @returns Promise<ApiSuccessResponse | ApiErrorResponse> - 登録結果
+ * ユーザーを登録します
+ * @param email - メールアドレス
+ * @param password - パスワード
+ * @param name - 名前（オプション）
+ * @returns 登録されたユーザー情報
  */
 export async function registerUser(
-  registerData: RegisterRequest
-): Promise<ApiSuccessResponse<{ user: User; tokens: AuthTokens }> | ApiErrorResponse> {
+  email: string, 
+  password: string, 
+  name?: string
+): Promise<any> {
   try {
-    const { email, password, name } = registerData;
-
     // メールアドレスの重複チェック
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -123,95 +124,122 @@ export async function registerUser(
     if (existingUser) {
       return {
         success: false,
-        error: 'このメールアドレスは既に登録されています',
-        timestamp: new Date().toISOString(),
+        error: {
+          code: 'EMAIL_EXISTS',
+          message: 'このメールアドレスは既に登録されています',
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: '1.0.0',
+        }
       };
     }
 
-    // パスワードをセキュアにハッシュ化
+    // パスワードをハッシュ化
     const passwordHash = await hashPassword(password);
 
-    // データベースに新規ユーザーを作成
+    // ユーザーを作成
     const user = await prisma.user.create({
       data: {
         email,
         passwordHash,
         name,
-        isActive: true,      // アカウント有効状態
-        emailVerified: false, // メール認証は未実装（将来対応）
+        isActive: true,
+        emailVerified: false, // 実際の本番環境ではメール認証を実装
       },
     });
 
-    // 認証トークンを生成
+    // JWTトークンを生成
     const accessToken = generateToken(user.id, user.email);
 
-    // セキュリティ：パスワードハッシュを除外したユーザー情報
+    // パスワードハッシュを除外したユーザー情報
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    // レスポンス用のトークン情報
-    const tokens: AuthTokens = {
+    const tokens = {
       accessToken,
-      refreshToken: accessToken, // 簡易実装（本格版では別途リフレッシュトークン）
+      refreshToken: accessToken, // 簡易実装
       expiresIn: parseInt(JWT_EXPIRES_IN),
       tokenType: 'Bearer',
     };
 
-    // 成功レスポンス
     return {
       success: true,
       data: {
         user: {
           ...userWithoutPassword,
+          id: user.id.toString(), // 型定義に合わせてstringに変換
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
           lastLoginAt: user.lastLoginAt?.toISOString(),
-        } as User,
+        },
         tokens,
       },
-      timestamp: new Date().toISOString(),
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+      }
     };
 
   } catch (error) {
     console.error('ユーザー登録エラー:', error);
     return {
       success: false,
-      error: 'ユーザー登録に失敗しました',
-      timestamp: new Date().toISOString(),
+      error: {
+        code: 'REGISTRATION_FAILED',
+        message: 'ユーザー登録に失敗しました',
+        details: process.env.NODE_ENV === 'development' ? { message: error instanceof Error ? error.message : String(error) } : undefined
+      },
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+      }
     };
   }
 }
 
 /**
- * ユーザーログイン処理
- * 認証情報を検証し、成功時にトークンを発行
- * @param credentials - ログイン認証情報
- * @returns Promise<ApiSuccessResponse | ApiErrorResponse> - ログイン結果
+ * ユーザーログインを処理します
+ * @param email - メールアドレス
+ * @param password - パスワード
+ * @returns 認証結果とトークン
  */
 export async function loginUser(
-  credentials: LoginCredentials
-): Promise<ApiSuccessResponse<{ user: User; tokens: AuthTokens }> | ApiErrorResponse> {
+  email: string, 
+  password: string
+): Promise<any> {
   try {
-    const { username: email, password } = credentials;
-
-    // ユーザーをメールアドレスで検索
+    // ユーザーを検索
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
+    // ユーザーが存在しない場合
     if (!user) {
       return {
         success: false,
-        error: 'メールアドレスまたはパスワードが正しくありません',
-        timestamp: new Date().toISOString(),
+        error: {
+          code: 'INVALID_CREDENTIALS',
+          message: 'メールアドレスまたはパスワードが正しくありません',
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: '1.0.0',
+        }
       };
     }
 
-    // アカウントロック状態のチェック
+    // アカウントロックチェック
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       return {
         success: false,
-        error: 'アカウントがロックされています。しばらくしてから再度お試しください',
-        timestamp: new Date().toISOString(),
+        error: {
+          code: 'ACCOUNT_LOCKED',
+          message: 'アカウントがロックされています。しばらくしてから再度お試しください',
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: '1.0.0',
+        }
       };
     }
 
@@ -219,14 +247,21 @@ export async function loginUser(
     if (!user.isActive) {
       return {
         success: false,
-        error: 'このアカウントは無効化されています',
-        timestamp: new Date().toISOString(),
+        error: {
+          code: 'ACCOUNT_DISABLED',
+          message: 'このアカウントは無効化されています',
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: '1.0.0',
+        }
       };
     }
 
     // パスワード検証
     const isPasswordValid = await verifyPassword(password, user.passwordHash);
 
+    // パスワードが正しくない場合
     if (!isPasswordValid) {
       // ログイン失敗回数を増加
       const failedAttempts = user.failedLoginAttempts + 1;
@@ -246,28 +281,40 @@ export async function loginUser(
 
       return {
         success: false,
-        error: 'メールアドレスまたはパスワードが正しくありません',
-        timestamp: new Date().toISOString(),
+        error: {
+          code: 'INVALID_CREDENTIALS',
+          message: 'メールアドレスまたはパスワードが正しくありません',
+          details: process.env.NODE_ENV === 'development' ? 
+            { 
+              attempts: failedAttempts, 
+              maxAttempts: MAX_LOGIN_ATTEMPTS,
+              locked: failedAttempts >= MAX_LOGIN_ATTEMPTS
+            } : undefined
+        },
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: '1.0.0',
+        }
       };
     }
 
-    // ログイン成功：セキュリティ情報をリセット
+    // ログイン成功：失敗回数をリセットし、最終ログイン時刻を更新
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        failedLoginAttempts: 0,    // 失敗回数をリセット
-        lockedUntil: null,         // ロック状態を解除
-        lastLoginAt: new Date(),   // 最終ログイン時刻を更新
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        lastLoginAt: new Date(),
       },
     });
 
-    // 認証トークンを生成
+    // JWTトークンを生成
     const accessToken = generateToken(user.id, user.email);
 
-    // セキュリティ：パスワードハッシュを除外
+    // パスワードハッシュを除外したユーザー情報
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    const tokens: AuthTokens = {
+    const tokens = {
       accessToken,
       refreshToken: accessToken, // 簡易実装
       expiresIn: parseInt(JWT_EXPIRES_IN),
@@ -279,31 +326,42 @@ export async function loginUser(
       data: {
         user: {
           ...userWithoutPassword,
+          id: user.id.toString(), // 型定義に合わせてstringに変換
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
           lastLoginAt: new Date().toISOString(),
-        } as User,
+        },
         tokens,
       },
-      timestamp: new Date().toISOString(),
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+      }
     };
 
   } catch (error) {
     console.error('ログインエラー:', error);
     return {
       success: false,
-      error: 'ログインに失敗しました',
-      timestamp: new Date().toISOString(),
+      error: {
+        code: 'LOGIN_FAILED',
+        message: 'ログインに失敗しました',
+        details: process.env.NODE_ENV === 'development' ? { message: error instanceof Error ? error.message : String(error) } : undefined
+      },
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+      }
     };
   }
 }
 
 /**
- * ユーザーIDでユーザー情報を取得
+ * ユーザー情報を取得します
  * @param userId - ユーザーID
- * @returns Promise<User | null> - ユーザー情報（見つからない場合はnull）
+ * @returns ユーザー情報
  */
-export async function getUserById(userId: number): Promise<User | null> {
+export async function getUserById(userId: number): Promise<any> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -313,15 +371,16 @@ export async function getUserById(userId: number): Promise<User | null> {
       return null;
     }
 
-    // セキュリティ：パスワードハッシュを除外
+    // パスワードハッシュなどの機密情報を除外
     const { passwordHash: _, ...userWithoutPassword } = user;
 
     return {
       ...userWithoutPassword,
+      id: user.id.toString(), // 型定義に合わせてstringに変換
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
       lastLoginAt: user.lastLoginAt?.toISOString(),
-    } as User;
+    };
 
   } catch (error) {
     console.error('ユーザー取得エラー:', error);
@@ -330,13 +389,16 @@ export async function getUserById(userId: number): Promise<User | null> {
 }
 
 /**
- * JWTトークンからユーザー情報を取得
+ * トークンからユーザー情報を取得します
  * @param token - JWTトークン
- * @returns Promise<User | null> - ユーザー情報（無効トークンの場合はnull）
+ * @returns ユーザー情報
  */
-export async function getUserFromToken(token: string): Promise<User | null> {
+export async function getUserFromToken(token: string): Promise<any> {
   try {
+    // トークンを検証してペイロードを取得
     const decoded = verifyToken(token);
+
+    // ペイロードからユーザーIDを取得してユーザー情報を検索
     return await getUserById(decoded.userId);
   } catch (error) {
     console.error('トークンからユーザー取得エラー:', error);

@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import type { Request, Response } from 'express';
 import { 
   registerController, 
   loginController, 
@@ -12,6 +13,7 @@ import {
 } from './auth.controller.js';
 import { authenticateToken } from '../../../middleware/auth.js';
 import { validateRegistration, validateLogin } from './auth.validation.js';
+import * as authService from '../../../services/authService.js';
 
 // Expressルーターのインスタンスを作成
 const router = Router();

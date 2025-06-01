@@ -3,7 +3,7 @@
  * JWTトークンの検証とユーザー認証を行います
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { getUserFromToken } from '../services/authService.js';
 import type { User } from '@test-ai-search-assistant/types';
 
