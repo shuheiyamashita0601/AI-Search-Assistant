@@ -17,7 +17,7 @@ export interface User {
 
 // ログイン認証情報
 export interface LoginCredentials {
-  readonly username: string; // emailアドレスを使用
+  readonly username: string; // ユーザー名を使用
   readonly password: string;
   readonly rememberMe?: boolean;
 }
