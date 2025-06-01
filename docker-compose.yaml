@@ -109,6 +109,7 @@ services:
       LOG_FILE_PATH: /app/logs/app.log
     ports:
       - "3001:3001"
+      - "5556:5556"  # Prisma Studio用ポート
     volumes:
       # ソースコードのホットリロード（読み書き可能に変更）
       - ./backend/src:/app/backend/src
