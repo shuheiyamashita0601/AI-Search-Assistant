@@ -20,7 +20,17 @@ model User {
   // 基本情報
   email     String   @unique @db.VarChar(255)  // メールアドレス（一意制約）
   name      String?  @db.VarChar(100)          // 名前（任意）
-  
+
+  // 認証情報（新規追加）
+  passwordHash String  @map("password_hash") @db.VarChar(255)
+  isActive     Boolean @default(true) @map("is_active")
+  emailVerified Boolean @default(false) @map ("email_verified")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  // セキュリティ強化フィールド
+  failedLoginAttempts Int     @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
   // タイムスタンプ
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
