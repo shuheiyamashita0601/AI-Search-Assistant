@@ -3,9 +3,12 @@
  * 認証関連のHTTPリクエストを処理する関数群
  */
 
-import type { Request, Response } from 'express';
-import { registerUser, loginUser } from '../../../services/authService.js';
-import type { LoginCredentials, RegisterRequest } from '@test-ai-search-assistant/types';
+import type { Request, Response } from "express";
+import { registerUser, loginUser } from "../../../services/authService.js";
+import type {
+  LoginCredentials,
+  RegisterRequest,
+} from "@test-ai-search-assistant/types";
 
 /**
  * ユーザー登録コントローラー
@@ -13,7 +16,10 @@ import type { LoginCredentials, RegisterRequest } from '@test-ai-search-assistan
  * @param req - Expressリクエストオブジェクト
  * @param res - Expressレスポンスオブジェクト
  */
-export async function registerController(req: Request, res: Response): Promise<void> {
+export async function registerController(
+  req: Request,
+  res: Response,
+): Promise<void> {
   try {
     // バリデーション済みのリクエストデータを取得
     const { email, password, name } = req.body;
@@ -30,13 +36,12 @@ export async function registerController(req: Request, res: Response): Promise<v
       console.warn(`ユーザー登録失敗: ${email} - ${result.error}`);
       res.status(400).json(result);
     }
-
   } catch (error) {
-    console.error('登録コントローラーエラー:', error);
+    console.error("登録コントローラーエラー:", error);
     res.status(500).json({
       success: false,
-      error: '内部サーバーエラーが発生しました',
-      message: 'ユーザー登録処理中にサーバーエラーが発生しました',
+      error: "内部サーバーエラーが発生しました",
+      message: "ユーザー登録処理中にサーバーエラーが発生しました",
       timestamp: new Date().toISOString(),
     });
   }
@@ -48,7 +53,10 @@ export async function registerController(req: Request, res: Response): Promise<v
  * @param req - Expressリクエストオブジェクト
  * @param res - Expressレスポンスオブジェクト
  */
-export async function loginController(req: Request, res: Response): Promise<void> {
+export async function loginController(
+  req: Request,
+  res: Response,
+): Promise<void> {
   try {
     // バリデーション済みのリクエストデータを取得
     const { email, password } = req.body;
@@ -65,13 +73,12 @@ export async function loginController(req: Request, res: Response): Promise<void
       console.warn(`ログイン失敗: ${email} - ${result.error}`);
       res.status(401).json(result);
     }
-
   } catch (error) {
-    console.error('ログインコントローラーエラー:', error);
+    console.error("ログインコントローラーエラー:", error);
     res.status(500).json({
       success: false,
-      error: '内部サーバーエラーが発生しました',
-      message: 'ログイン処理中にサーバーエラーが発生しました',
+      error: "内部サーバーエラーが発生しました",
+      message: "ログイン処理中にサーバーエラーが発生しました",
       timestamp: new Date().toISOString(),
     });
   }
@@ -83,14 +90,17 @@ export async function loginController(req: Request, res: Response): Promise<void
  * @param req - Expressリクエストオブジェクト（req.userに認証済みユーザー情報）
  * @param res - Expressレスポンスオブジェクト
  */
-export async function profileController(req: Request, res: Response): Promise<void> {
+export async function profileController(
+  req: Request,
+  res: Response,
+): Promise<void> {
   try {
     // authenticateTokenミドルウェアでreq.userが設定されている
     if (!req.user) {
       res.status(401).json({
         success: false,
-        error: '認証が必要です',
-        message: '認証ミドルウェアでユーザー情報が設定されていません',
+        error: "認証が必要です",
+        message: "認証ミドルウェアでユーザー情報が設定されていません",
         timestamp: new Date().toISOString(),
       });
       return;
@@ -104,13 +114,12 @@ export async function profileController(req: Request, res: Response): Promise<vo
       data: req.user,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('プロフィール取得エラー:', error);
+    console.error("プロフィール取得エラー:", error);
     res.status(500).json({
       success: false,
-      error: '内部サーバーエラーが発生しました',
-      message: 'プロフィール取得処理中にサーバーエラーが発生しました',
+      error: "内部サーバーエラーが発生しました",
+      message: "プロフィール取得処理中にサーバーエラーが発生しました",
       timestamp: new Date().toISOString(),
     });
   }
@@ -122,14 +131,17 @@ export async function profileController(req: Request, res: Response): Promise<vo
  * @param req - Expressリクエストオブジェクト
  * @param res - Expressレスポンスオブジェクト
  */
-export async function logoutController(req: Request, res: Response): Promise<void> {
+export async function logoutController(
+  req: Request,
+  res: Response,
+): Promise<void> {
   try {
     // 現在は簡易実装：クライアント側でトークンを削除
     // 本格的な実装では以下を検討:
     // - トークンブラックリストの管理
     // - Redisでのセッション管理
     // - リフレッシュトークンの無効化
-    
+
     if (req.user) {
       console.log(`ログアウト: ユーザーID ${req.user.id} (${req.user.email})`);
     }
@@ -137,18 +149,17 @@ export async function logoutController(req: Request, res: Response): Promise<voi
     res.status(200).json({
       success: true,
       data: {
-        message: 'ログアウトしました',
-        instruction: 'クライアント側でアクセストークンを削除してください',
+        message: "ログアウトしました",
+        instruction: "クライアント側でアクセストークンを削除してください",
       },
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('ログアウトエラー:', error);
+    console.error("ログアウトエラー:", error);
     res.status(500).json({
       success: false,
-      error: '内部サーバーエラーが発生しました',
-      message: 'ログアウト処理中にサーバーエラーが発生しました',
+      error: "内部サーバーエラーが発生しました",
+      message: "ログアウト処理中にサーバーエラーが発生しました",
       timestamp: new Date().toISOString(),
     });
   }

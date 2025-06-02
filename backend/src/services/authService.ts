@@ -3,29 +3,30 @@
  * ユーザーの登録、ログイン、認証トークンの管理を行います
  */
 
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
 import type {
   LoginCredentials,
   AuthTokens,
   User,
   RegisterRequest,
   ApiSuccessResponse,
-  ApiErrorResponse
-} from '@test-ai-search-assistant/types';
+  ApiErrorResponse,
+} from "@test-ai-search-assistant/types";
 
 // Prismaクライアントのインスタンス化
 const prisma = new PrismaClient();
 
 // JWT設定の取得（環境変数から）
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-development-only';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '86400'; // 24時間（秒）
+const JWT_SECRET =
+  process.env.JWT_SECRET || "fallback-secret-key-development-only";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "86400"; // 24時間（秒）
 
 // セキュリティ設定の定数
-const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
-const LOCK_TIME = parseInt(process.env.ACCOUNT_LOCK_TIME || '7200000'); // 2時間
-const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
+const MAX_LOGIN_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || "5");
+const LOCK_TIME = parseInt(process.env.ACCOUNT_LOCK_TIME || "7200000"); // 2時間
+const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "12");
 
 /**
  * パスワードをハッシュ化する関数
@@ -38,8 +39,8 @@ async function hashPassword(password: string): Promise<string> {
     // bcryptでソルト付きハッシュを生成
     return await bcrypt.hash(password, SALT_ROUNDS);
   } catch (error) {
-    console.error('パスワードハッシュ化エラー:', error);
-    throw new Error('パスワードのハッシュ化に失敗しました');
+    console.error("パスワードハッシュ化エラー:", error);
+    throw new Error("パスワードのハッシュ化に失敗しました");
   }
 }
 
@@ -50,12 +51,15 @@ async function hashPassword(password: string): Promise<string> {
  * @param hashedPassword - データベース保存されたハッシュ値
  * @returns Promise<boolean> - 検証結果（true: 一致, false: 不一致）
  */
-async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+async function verifyPassword(
+  password: string,
+  hashedPassword: string,
+): Promise<boolean> {
   try {
     // bcryptで安全に比較
     return await bcrypt.compare(password, hashedPassword);
   } catch (error) {
-    console.error('パスワード検証エラー:', error);
+    console.error("パスワード検証エラー:", error);
     return false;
   }
 }
@@ -70,8 +74,8 @@ async function verifyPassword(password: string, hashedPassword: string): Promise
 function generateToken(userId: number, email: string): string {
   // JWTペイロードの構成
   const payload = {
-    userId,          // ユーザーID
-    email,           // メールアドレス
+    userId, // ユーザーID
+    email, // メールアドレス
     iat: Math.floor(Date.now() / 1000), // 発行時刻（Unix時間）
   };
 
@@ -94,11 +98,11 @@ export function verifyToken(token: string): any {
     return jwt.verify(token, JWT_SECRET);
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      throw new Error('トークンの有効期限が切れています');
+      throw new Error("トークンの有効期限が切れています");
     } else if (error instanceof jwt.JsonWebTokenError) {
-      throw new Error('無効なトークンです');
+      throw new Error("無効なトークンです");
     } else {
-      throw new Error('トークンの検証に失敗しました');
+      throw new Error("トークンの検証に失敗しました");
     }
   }
 }
@@ -111,9 +115,9 @@ export function verifyToken(token: string): any {
  * @returns 登録されたユーザー情報
  */
 export async function registerUser(
-  email: string, 
-  password: string, 
-  name?: string
+  email: string,
+  password: string,
+  name?: string,
 ): Promise<any> {
   try {
     // メールアドレスの重複チェック
@@ -125,13 +129,13 @@ export async function registerUser(
       return {
         success: false,
         error: {
-          code: 'EMAIL_EXISTS',
-          message: 'このメールアドレスは既に登録されています',
+          code: "EMAIL_EXISTS",
+          message: "このメールアドレスは既に登録されています",
         },
         meta: {
           timestamp: new Date().toISOString(),
-          version: '1.0.0',
-        }
+          version: "1.0.0",
+        },
       };
     }
 
@@ -159,7 +163,7 @@ export async function registerUser(
       accessToken,
       refreshToken: accessToken, // 簡易実装
       expiresIn: parseInt(JWT_EXPIRES_IN),
-      tokenType: 'Bearer',
+      tokenType: "Bearer",
     };
 
     return {
@@ -176,23 +180,27 @@ export async function registerUser(
       },
       meta: {
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
-      }
+        version: "1.0.0",
+      },
     };
-
   } catch (error) {
-    console.error('ユーザー登録エラー:', error);
+    console.error("ユーザー登録エラー:", error);
     return {
       success: false,
       error: {
-        code: 'REGISTRATION_FAILED',
-        message: 'ユーザー登録に失敗しました',
-        details: process.env.NODE_ENV === 'development' ? { message: error instanceof Error ? error.message : String(error) } : undefined
+        code: "REGISTRATION_FAILED",
+        message: "ユーザー登録に失敗しました",
+        details:
+          process.env.NODE_ENV === "development"
+            ? {
+                message: error instanceof Error ? error.message : String(error),
+              }
+            : undefined,
       },
       meta: {
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
-      }
+        version: "1.0.0",
+      },
     };
   }
 }
@@ -203,10 +211,7 @@ export async function registerUser(
  * @param password - パスワード
  * @returns 認証結果とトークン
  */
-export async function loginUser(
-  email: string, 
-  password: string
-): Promise<any> {
+export async function loginUser(email: string, password: string): Promise<any> {
   try {
     // ユーザーを検索
     const user = await prisma.user.findUnique({
@@ -218,13 +223,13 @@ export async function loginUser(
       return {
         success: false,
         error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'メールアドレスまたはパスワードが正しくありません',
+          code: "INVALID_CREDENTIALS",
+          message: "メールアドレスまたはパスワードが正しくありません",
         },
         meta: {
           timestamp: new Date().toISOString(),
-          version: '1.0.0',
-        }
+          version: "1.0.0",
+        },
       };
     }
 
@@ -233,13 +238,14 @@ export async function loginUser(
       return {
         success: false,
         error: {
-          code: 'ACCOUNT_LOCKED',
-          message: 'アカウントがロックされています。しばらくしてから再度お試しください',
+          code: "ACCOUNT_LOCKED",
+          message:
+            "アカウントがロックされています。しばらくしてから再度お試しください",
         },
         meta: {
           timestamp: new Date().toISOString(),
-          version: '1.0.0',
-        }
+          version: "1.0.0",
+        },
       };
     }
 
@@ -248,13 +254,13 @@ export async function loginUser(
       return {
         success: false,
         error: {
-          code: 'ACCOUNT_DISABLED',
-          message: 'このアカウントは無効化されています',
+          code: "ACCOUNT_DISABLED",
+          message: "このアカウントは無効化されています",
         },
         meta: {
           timestamp: new Date().toISOString(),
-          version: '1.0.0',
-        }
+          version: "1.0.0",
+        },
       };
     }
 
@@ -282,19 +288,21 @@ export async function loginUser(
       return {
         success: false,
         error: {
-          code: 'INVALID_CREDENTIALS',
-          message: 'メールアドレスまたはパスワードが正しくありません',
-          details: process.env.NODE_ENV === 'development' ? 
-            { 
-              attempts: failedAttempts, 
-              maxAttempts: MAX_LOGIN_ATTEMPTS,
-              locked: failedAttempts >= MAX_LOGIN_ATTEMPTS
-            } : undefined
+          code: "INVALID_CREDENTIALS",
+          message: "メールアドレスまたはパスワードが正しくありません",
+          details:
+            process.env.NODE_ENV === "development"
+              ? {
+                  attempts: failedAttempts,
+                  maxAttempts: MAX_LOGIN_ATTEMPTS,
+                  locked: failedAttempts >= MAX_LOGIN_ATTEMPTS,
+                }
+              : undefined,
         },
         meta: {
           timestamp: new Date().toISOString(),
-          version: '1.0.0',
-        }
+          version: "1.0.0",
+        },
       };
     }
 
@@ -318,7 +326,7 @@ export async function loginUser(
       accessToken,
       refreshToken: accessToken, // 簡易実装
       expiresIn: parseInt(JWT_EXPIRES_IN),
-      tokenType: 'Bearer',
+      tokenType: "Bearer",
     };
 
     return {
@@ -335,23 +343,27 @@ export async function loginUser(
       },
       meta: {
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
-      }
+        version: "1.0.0",
+      },
     };
-
   } catch (error) {
-    console.error('ログインエラー:', error);
+    console.error("ログインエラー:", error);
     return {
       success: false,
       error: {
-        code: 'LOGIN_FAILED',
-        message: 'ログインに失敗しました',
-        details: process.env.NODE_ENV === 'development' ? { message: error instanceof Error ? error.message : String(error) } : undefined
+        code: "LOGIN_FAILED",
+        message: "ログインに失敗しました",
+        details:
+          process.env.NODE_ENV === "development"
+            ? {
+                message: error instanceof Error ? error.message : String(error),
+              }
+            : undefined,
       },
       meta: {
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
-      }
+        version: "1.0.0",
+      },
     };
   }
 }
@@ -381,9 +393,8 @@ export async function getUserById(userId: number): Promise<any> {
       updatedAt: user.updatedAt.toISOString(),
       lastLoginAt: user.lastLoginAt?.toISOString(),
     };
-
   } catch (error) {
-    console.error('ユーザー取得エラー:', error);
+    console.error("ユーザー取得エラー:", error);
     return null;
   }
 }
@@ -401,7 +412,7 @@ export async function getUserFromToken(token: string): Promise<any> {
     // ペイロードからユーザーIDを取得してユーザー情報を検索
     return await getUserById(decoded.userId);
   } catch (error) {
-    console.error('トークンからユーザー取得エラー:', error);
+    console.error("トークンからユーザー取得エラー:", error);
     return null;
   }
 }

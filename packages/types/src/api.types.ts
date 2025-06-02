@@ -63,19 +63,28 @@ export interface BaseSearchQuery {
   /** ソート順 */
   sortBy?: string;
   /** ソート方向 */
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // HTTPステータスコード
-export type HttpStatusCode = 200 | 201 | 400 | 401 | 403 | 404 | 409 | 422 | 500;
+export type HttpStatusCode =
+  | 200
+  | 201
+  | 400
+  | 401
+  | 403
+  | 404
+  | 409
+  | 422
+  | 500;
 
 // APIエラーコード
-export type ApiErrorCode = 
-  | 'VALIDATION_ERROR'
-  | 'AUTHENTICATION_ERROR'
-  | 'AUTHORIZATION_ERROR'
-  | 'NOT_FOUND'
-  | 'CONFLICT'
-  | 'RATE_LIMIT_EXCEEDED'
-  | 'INTERNAL_SERVER_ERROR'
-  | 'SERVICE_UNAVAILABLE';
+export type ApiErrorCode =
+  | "VALIDATION_ERROR"
+  | "AUTHENTICATION_ERROR"
+  | "AUTHORIZATION_ERROR"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "RATE_LIMIT_EXCEEDED"
+  | "INTERNAL_SERVER_ERROR"
+  | "SERVICE_UNAVAILABLE";

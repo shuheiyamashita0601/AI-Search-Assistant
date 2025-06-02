@@ -3,17 +3,17 @@
  * 認証機能のエンドポイントを定義し、適切なミドルウェアを適用
  */
 
-import { Router } from 'express';
-import type { Request, Response } from 'express';
-import { 
-  registerController, 
-  loginController, 
+import { Router } from "express";
+import type { Request, Response } from "express";
+import {
+  registerController,
+  loginController,
   profileController,
-  logoutController 
-} from './auth.controller.js';
-import { authenticateToken } from '../../../middleware/auth.js';
-import { validateRegistration, validateLogin } from './auth.validation.js';
-import * as authService from '../../../services/authService.js';
+  logoutController,
+} from "./auth.controller.js";
+import { authenticateToken } from "../../../middleware/auth.js";
+import { validateRegistration, validateLogin } from "./auth.validation.js";
+import * as authService from "../../../services/authService.js";
 
 // Expressルーターのインスタンスを作成
 const router = Router();
@@ -25,7 +25,7 @@ const router = Router();
  * @middleware validateRegistration - 登録データのバリデーション
  * @controller registerController - 登録処理
  */
-router.post('/register', validateRegistration, registerController);
+router.post("/register", validateRegistration, registerController);
 
 /**
  * POST /api/v1/auth/login
@@ -34,7 +34,7 @@ router.post('/register', validateRegistration, registerController);
  * @middleware validateLogin - ログインデータのバリデーション
  * @controller loginController - ログイン処理
  */
-router.post('/login', validateLogin, loginController);
+router.post("/login", validateLogin, loginController);
 
 /**
  * GET /api/v1/auth/profile
@@ -43,7 +43,7 @@ router.post('/login', validateLogin, loginController);
  * @middleware authenticateToken - JWT認証
  * @controller profileController - プロフィール取得処理
  */
-router.get('/profile', authenticateToken, profileController);
+router.get("/profile", authenticateToken, profileController);
 
 /**
  * POST /api/v1/auth/logout
@@ -52,7 +52,7 @@ router.get('/profile', authenticateToken, profileController);
  * @middleware authenticateToken - JWT認証
  * @controller logoutController - ログアウト処理
  */
-router.post('/logout', authenticateToken, logoutController);
+router.post("/logout", authenticateToken, logoutController);
 
 // その他の認証関連エンドポイント（将来実装予定）
 

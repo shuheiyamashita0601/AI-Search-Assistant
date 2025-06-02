@@ -1,7 +1,7 @@
 /**
  * 共有型定義パッケージのメインエクスポートファイル
  * フロントエンドとバックエンドで共有するTypeScript型定義
- * 
+ *
  * @packageDocumentation
  */
 
@@ -67,7 +67,7 @@ export interface PaginationParams {
   /** ソート対象のフィールド */
   readonly sortBy?: string;
   /** ソート順序（昇順または降順） */
-  readonly sortOrder?: 'asc' | 'desc';
+  readonly sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -205,7 +205,7 @@ export interface AuthTokens {
   /** トークンの有効期限（秒） */
   readonly expiresIn: number;
   /** トークンの種類 */
-  readonly tokenType: 'Bearer';
+  readonly tokenType: "Bearer";
 }
 
 // =============================================================================
@@ -231,9 +231,10 @@ export interface ValidationError {
  * バリデーションエラーレスポンス
  * 複数のバリデーションエラーをまとめて返す場合
  */
-export interface ValidationErrorResponse extends Omit<ApiErrorResponse, 'error'> {
+export interface ValidationErrorResponse
+  extends Omit<ApiErrorResponse, "error"> {
   /** バリデーションエラーである旨 */
-  readonly error: 'VALIDATION_ERROR';
+  readonly error: "VALIDATION_ERROR";
   /** 個別のバリデーションエラー一覧 */
   readonly validationErrors: readonly ValidationError[];
 }
@@ -252,7 +253,7 @@ export interface AppConfig {
   /** アプリケーションバージョン */
   readonly version: string;
   /** 実行環境 */
-  readonly environment: 'development' | 'staging' | 'production';
+  readonly environment: "development" | "staging" | "production";
   /** デバッグモードの有効性 */
   readonly debugMode: boolean;
   /** フィーチャーフラグ */
@@ -265,10 +266,10 @@ export interface AppConfig {
 
 /**
  * API成功レスポンスかどうかを判定する型ガード関数
- * 
+ *
  * @param response - 判定対象のAPIレスポンス
  * @returns 成功レスポンスの場合true
- * 
+ *
  * @example
  * ```typescript
  * if (isApiSuccessResponse(response)) {
@@ -278,17 +279,17 @@ export interface AppConfig {
  * ```
  */
 export function isApiSuccessResponse<T = unknown>(
-  response: ApiResponse<T>
+  response: ApiResponse<T>,
 ): response is ApiSuccessResponse<T> {
   return response.success === true;
 }
 
 /**
  * APIエラーレスポンスかどうかを判定する型ガード関数
- * 
+ *
  * @param response - 判定対象のAPIレスポンス
  * @returns エラーレスポンスの場合true
- * 
+ *
  * @example
  * ```typescript
  * if (isApiErrorResponse(response)) {
@@ -298,17 +299,17 @@ export function isApiSuccessResponse<T = unknown>(
  * ```
  */
 export function isApiErrorResponse<T = unknown>(
-  response: ApiResponse<T>
+  response: ApiResponse<T>,
 ): response is ApiErrorResponse {
   return response.success === false;
 }
 
 /**
  * バリデーションエラーレスポンスかどうかを判定する型ガード関数
- * 
+ *
  * @param response - 判定対象のAPIレスポンス
  * @returns バリデーションエラーレスポンスの場合true
- * 
+ *
  * @example
  * ```typescript
  * if (isValidationErrorResponse(response)) {
@@ -320,9 +321,9 @@ export function isApiErrorResponse<T = unknown>(
  * ```
  */
 export function isValidationErrorResponse(
-  response: ApiResponse<unknown>
+  response: ApiResponse<unknown>,
 ): response is ValidationErrorResponse {
-  return isApiErrorResponse(response) && response.error === 'VALIDATION_ERROR';
+  return isApiErrorResponse(response) && response.error === "VALIDATION_ERROR";
 }
 
 // =============================================================================
@@ -391,17 +392,17 @@ export const HTTP_STATUS = {
  */
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/api/v1/auth/login',
-    LOGOUT: '/api/v1/auth/logout',
-    REFRESH: '/api/v1/auth/refresh',
-    PROFILE: '/api/v1/auth/profile',
+    LOGIN: "/api/v1/auth/login",
+    LOGOUT: "/api/v1/auth/logout",
+    REFRESH: "/api/v1/auth/refresh",
+    PROFILE: "/api/v1/auth/profile",
   },
   SEARCH: {
-    QUERY: '/api/v1/search',
-    SUGGESTIONS: '/api/v1/search/suggestions',
-    HISTORY: '/api/v1/search/history',
+    QUERY: "/api/v1/search",
+    SUGGESTIONS: "/api/v1/search/suggestions",
+    HISTORY: "/api/v1/search/history",
   },
-  HEALTH: '/api/v1/health',
+  HEALTH: "/api/v1/health",
 } as const;
 
 /**
@@ -409,12 +410,12 @@ export const API_ENDPOINTS = {
  * 一貫したエラーメッセージを提供
  */
 export const VALIDATION_MESSAGES = {
-  REQUIRED: '必須項目です',
-  EMAIL_INVALID: '有効なメールアドレスを入力してください',
-  PASSWORD_TOO_SHORT: 'パスワードは8文字以上で入力してください',
-  PASSWORD_TOO_WEAK: 'パスワードは英数字と記号を含む必要があります',
-  USERNAME_TOO_SHORT: 'ユーザー名は3文字以上で入力してください',
-  QUERY_TOO_SHORT: '検索クエリは2文字以上で入力してください',
+  REQUIRED: "必須項目です",
+  EMAIL_INVALID: "有効なメールアドレスを入力してください",
+  PASSWORD_TOO_SHORT: "パスワードは8文字以上で入力してください",
+  PASSWORD_TOO_WEAK: "パスワードは英数字と記号を含む必要があります",
+  USERNAME_TOO_SHORT: "ユーザー名は3文字以上で入力してください",
+  QUERY_TOO_SHORT: "検索クエリは2文字以上で入力してください",
 } as const;
 
 // =============================================================================
@@ -422,8 +423,8 @@ export const VALIDATION_MESSAGES = {
 // =============================================================================
 
 // 既存のエクスポートを保持
-export * from './api.js';
-export * from './common.js';
+export * from "./api.js";
+export * from "./common.js";
 
 // 認証関連の型定義を追加
-export * from './auth.js';
+export * from "./auth.js";

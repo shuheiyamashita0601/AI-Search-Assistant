@@ -27,7 +27,7 @@ export interface AuthTokens {
   readonly accessToken: string;
   readonly refreshToken: string;
   readonly expiresIn: number;
-  readonly tokenType: 'Bearer';
+  readonly tokenType: "Bearer";
 }
 
 // ユーザー登録情報
@@ -54,7 +54,7 @@ export interface ValidationError {
 // バリデーションエラーレスポンス
 export interface ValidationErrorResponse {
   readonly success: false;
-  readonly error: 'VALIDATION_ERROR';
+  readonly error: "VALIDATION_ERROR";
   readonly validationErrors: ValidationError[];
   readonly timestamp: string;
 }
